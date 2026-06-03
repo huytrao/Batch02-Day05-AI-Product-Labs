@@ -1,71 +1,534 @@
-## 1. Product Slices Exploration
-
-Để giải quyết bài toán tìm kiếm đồ ăn tại Ocean Park 1, dưới đây là đề xuất 3 lát cắt (slices) với các định hướng tiếp cận khác nhau để team cân nhắc:
-
-### Slice A — Quick Open+Cuisine Finder (Tìm quán đang mở cửa)
-* **Target User:** Cư dân cần biết chính xác quán nào đang mở cửa trong vòng 30 phút tới để đến ăn hoặc mua mang về.
-* **Core Task:** Xác định trạng thái hoạt động thực tế của quán ăn dựa trên dữ liệu hỗn hợp.
-* **AI Decision:** Sử dụng AI để tổng hợp dữ liệu thời gian mở cửa từ Google Maps, các bài đăng gom đơn trên Facebook và báo cáo từ người dùng (user reports) nhằm suy diễn (infer) mức độ tin cậy "Open Now".
-* **Output:** Top 3 địa điểm "Đang mở cửa" kèm điểm số tin cậy (confidence score) và một câu lý giải ngắn gọn.
-* **Failure Mitigation:** Hiển thị các nguồn dữ liệu gốc + gợi ý số điện thoại hotline hoặc nút nhờ cộng đồng xác minh hộ.
-
-### Slice B — Fast Delivery Suggestion (Gợi ý giao hàng nhanh) — **[CHOSEN]**
-* **Target User:** Cư dân bận rộn tại Ocean Park 1 muốn đặt đồ ăn giao tận cửa và yêu cầu nhận hàng nhanh chóng trong vòng 30–45 phút.
-* **Core Task:** Kết hợp các tín hiệu thời gian giao hàng (ETA) từ nhiều app và báo cáo thực tế để chọn ra quán tối ưu tốc độ.
-* **AI Decision:** Sử dụng AI/Heuristics để kết hợp các tín hiệu ETA từ ShopeeFood/GrabFood với các báo cáo giao hàng gần nhất của cư dân trong khu vực nhằm dự đoán thời gian giao hàng thực tế (Expected ETA) và đề xuất 2 lựa chọn tốt nhất.
-* **Output:** 2 nhà hàng được đề xuất kèm thời gian ETA dự đoán, mức độ tin cậy và một ghi chú ngắn (Ví dụ: *"Có sẵn tài xế, món chuẩn bị nhanh"*).
-* **Failure Mitigation:** Hiển thị các phương án thay thế như tự đến lấy (pickup) và quay về luồng yêu cầu người dùng xác nhận lại.
-
-### Slice C — Dietary Filtered Suggest (Bộ lọc chế độ ăn đặc biệt)
-* **Target User:** Cư dân hoặc khách ghé thăm Ocean Park 1 có nhu cầu ăn chay (Vegetarian) hoặc ăn thuần hồi giáo (Halal).
-* **Core Task:** Sàng lọc và xác thực các quán có thực đơn phù hợp dựa trên đánh giá của cộng đồng.
-* **AI Decision:** Sử dụng AI để quét và phân tích nội dung từ các nguồn dữ liệu tổng hợp nhằm gắn tag thực đơn (menu tags) và kiểm chứng mức độ "chuẩn vị/uy tín" thông qua thảo luận cộng đồng.
-* **Output:** Top 3 địa điểm ăn chay/Halal đã được xác thực kèm theo các đoạn trích bằng chứng (evidence) từ bài đánh giá.
-* **Failure Mitigation:** Trích dẫn trực tiếp câu chữ của nguồn cấp dữ liệu và cho phép người dùng gửi phản hồi sửa đổi (correction) nếu AI gắn tag sai.
+Project: Ocean Park 1 Eats — Aggregated Dining Info  
+Owner: Cong Thai — Product Spec Owner  
+Main responsibility: propose build slices, choose the final slice, define Auto/Aug decision, and describe four paths for the prototype.
 
 ---
 
-## 2. Selection Rationale (Lý do chọn Slice B)
+## 1. Context
 
-Team mình quyết định chọn **Slice B — Fast Delivery Suggest** làm trọng tâm phát triển cho bản Prototype. Lý do cốt lõi bao gồm:
-1. **Tính khả thi cao trong thời gian ngắn (6 tiếng):** Phạm vi tác vụ hẹp (narrow task), các tín hiệu đầu vào từ các nền tảng giao hàng (ShopeeFood/Grab) rất rõ ràng và dễ giả lập bằng dữ liệu mẫu (fake data) trong SQLite.
-2. **Giá trị Demo cao:** Đánh trúng nỗi đau thực tế của cư dân (giao hàng trễ, app báo một đằng shipper đi một nẻo). Luồng trải nghiệm ngắn gọn, trực quan, rất phù hợp để chạy Demo 3 phút.
+Residents of Ocean Park 1 often need to make a quick food decision, but information is scattered across Facebook groups, Google Maps, ShopeeFood, GrabFood, and informal user reports. The main pain is not simply “finding food”; the harder problem is knowing which option is reliable right now: open, available, close enough, and likely to deliver within the expected time.
 
----
-
-## 3. Auto / Aug Decision (Quyết định Tự động hóa vs. Trợ lực)
-
-* **Quyết định:** **Conditional Automation với sự hỗ trợ đắc lực của Augmentation (Tự động hóa có điều kiện kèm trợ lực con người)**.
-* **Vai trò của AI (AI suggests):** Dự đoán khả năng giao hàng, tính toán Expected ETA và đề xuất ra 2 phương án tối ưu nhất.
-* **Vai trò của Con người (User decides):** Người dùng chủ động kiểm tra các nguồn chứng cứ (evidence), mức độ tin cậy được hiển thị và bấm xác nhận đơn hàng.
-* **Lý do:** Quyết định đặt đồ ăn có mức độ rủi ro trung bình (giao trễ gây đói bụng, bực mình, lãng phí thời gian). Việc hiển thị minh bạch nguồn dữ liệu giúp người dùng làm chủ quyết định, tránh việc AI tự động đặt đơn khi dữ liệu có độ nhiễu cao.
+For Day 06, the prototype should avoid overbuilding a full food-ordering app. The goal is to choose a narrow build slice that can be demonstrated with controlled fake data, visible confidence, and clear fallback behavior.
 
 ---
 
-## 4. Detailed Four Paths (Xây dựng 4 kịch bản vận hành)
+## 2. Prototype Assumptions
 
-Để chuẩn bị cho cấu trúc cơ sở dữ liệu và kịch bản demo, dưới đây là chi tiết 4 đường đi của dữ liệu đối với **Slice B**:
+This file assumes the Day 06 prototype is a thin demo, not a production system.
 
-### 4.1. Happy Path (Luồng lý tưởng)
-* **Bối cảnh:** Dữ liệu đầu vào đồng nhất, tín hiệu từ Grab/ShopeeFood ổn định, không có bài phàn nàn nào gần đây về việc thiếu tài xế tại phân khu.
-* **Hành vi người dùng:** Người dùng mở ứng dụng, chọn tính năng "Giao nhanh".
-* **Hệ thống xử lý:** Hệ thống truy vấn SQLite, AI phân tích thấy dữ liệu đồng nhất → Tính toán ETA dự kiến là 35 phút (Confidence: **HIGH**).
-* **Kết quả:** Hệ thống hiển thị 2 quán (ví dụ: *Bánh Mì PewPew* và *Phở Thìn Ocean Park*). Người dùng thấy thông tin minh bạch, bấm vào link nguồn và chuyển hướng đặt hàng thành công.
+- No live scraping.
+- No real payment or order placement.
+- No direct integration with ShopeeFood, GrabFood, Google Maps, or Facebook APIs.
+- Data will be fake/controlled and stored in CSV or SQLite.
+- The AI decision can be implemented as a simple ranking heuristic or lightweight LLM-assisted explanation over structured data.
+- All restaurant names used in demo data must be replaced or verified by Member A/B before final submission.
+- Any unverified restaurant name should be marked as `demo placeholder`.
 
-### 4.2. Low Confidence Path (Luồng tin cậy thấp)
-* **Bối cảnh:** Dữ liệu có sự xung đột. Ví dụ: App Grab báo ETA là 25 phút, nhưng trên nhóm cư dân Facebook cách đây 15 phút có 2 bài đăng phàn nàn: *"Khu vực OP1 đang mưa lớn, tìm shipper rất khó, đơn hàng bị treo"*.
-* **Hành vi người dùng:** Người dùng bấm tìm kiếm "Giao nhanh" vào giờ cao điểm/lúc thời tiết xấu.
-* **Hệ thống xử lý:** AI phát hiện tín hiệu mâu thuẫn giữa API giả lập và bài đăng thực tế của cộng đồng. Hệ thống không ẩn quán ăn đi nhưng hạ điểm tin cậy xuống.
-* **Kết quả:** Giao diện hiển thị biểu tượng cảnh báo màu vàng (Badge: **Low Confidence**) kèm ghi chú: *"Hệ thống phát hiện có phản ánh chậm trễ do thời tiết từ Facebook. ETA dự kiến có thể kéo dài từ 45-60 phút"*. Người dùng tự cân nhắc rủi ro trước khi bấm đặt.
+Suggested minimum data fields:
 
-### 4.3. Failure Path (Luồng thất bại)
-* **Bối cảnh:** AI dự đoán quán ăn A giao rất nhanh (ETA 30 phút, Confidence High) do dữ liệu lịch sử tốt. Tuy nhiên, thực tế quán A đột ngột đóng cửa sửa chữa hoặc hết nguyên liệu mà không cập nhật trên app hệ thống, dẫn đến việc đơn hàng thực tế bị hủy hoặc kéo dài >60 phút.
-* **Hành vi người dùng:** Người dùng gặp phải tình trạng đơn hàng bị treo hoặc bị hủy sau khi đặt theo gợi ý.
-* **Hệ thống xử lý:** Hệ thống ghi nhận log sai lệch dữ liệu (mismatch) giữa dự đoán và thực tế thông qua nút báo cáo của người dùng.
-* **Kết quả:** Giao diện lập tức hiển thị thông báo xin lỗi công khai, kích hoạt phương án cứu vãn (fallback): Gợi ý hotline gọi trực tiếp cho chủ quán, hiển thị danh sách các quán thay thế ở ngay chân tòa nhà (có thể đi bộ ra lấy) và gửi log lỗi này về cho **Evidence Owner (Member B)** để cập nhật lại trọng số nguồn dữ liệu.
+| Field | Meaning |
+|---|---|
+| `restaurant_id` | Unique restaurant ID |
+| `restaurant_name` | Restaurant name |
+| `vendor` | GrabFood, ShopeeFood, direct order, pickup |
+| `platform_eta_min` | Current/simulated ETA from food platform |
+| `platform_eta_max` | Upper ETA estimate |
+| `open_status` | open / closed / unknown |
+| `recent_report_status` | normal / slow / cancelled / unknown |
+| `report_recency_min` | How recent the user/community report is |
+| `distance_score` | Simple score for distance from user location |
+| `evidence_links` | Links or IDs to source evidence |
+| `confidence` | high / medium / low |
 
-### 4.4. Correction Path (Luồng hiệu chỉnh)
-* **Bối cảnh:** Một quán ăn trong danh sách vừa đổi định vị từ tòa S1 sang tòa S2 hoặc đổi hotline đặt hàng trực tiếp nhưng hệ thống chưa cập nhật.
-* **Hành vi người dùng:** Người dùng phát hiện thông tin hiển thị bị sai lệch (ví dụ: quán đã đóng cửa hoặc đổi menu). Người dùng nhấn vào nút "Báo lỗi thông tin" trên giao diện.
-* **Hệ thống xử lý:** Hệ thống hiển thị một form biểu mẫu tinh gọn để người dùng nhanh chóng tick chọn lỗi (Sai vị trí / Sai trạng thái mở cửa / Điện thoại không liên lạc được).
-* **Kết quả:** Ngay sau khi submit, hệ thống cập nhật local cache để tạm thời hạ xếp hạng hoặc ẩn quán đó trong phiên tìm kiếm của các user khác tại phân khu đó. Đồng thời, một ticket dữ liệu sẽ được tự động gắn flag và gửi thẳng đến phân khu quản lý của **Evidence Owner** để kiểm chứng và cập nhật lại database gốc.
+---
+
+## 3. Product Slices Exploration
+
+### Slice A — Quick Open + Cuisine Finder
+
+**User:**  
+Resident of Ocean Park 1 who wants to know which restaurants are open within the next 30 minutes.
+
+**Task:**  
+Find 2–3 nearby restaurants that are likely open now and match a broad cuisine type.
+
+**AI decision:**  
+Infer `open_now_confidence` from simulated opening hours, recent community posts, and user reports.
+
+**Output:**  
+A ranked list of 3 restaurants with:
+
+- open/unknown status
+- cuisine type
+- confidence level
+- short reason
+- source/evidence link
+
+**Failure mitigation:**  
+If confidence is low or sources conflict, the UI shows “Check before going” and suggests calling the restaurant or choosing another option.
+
+**Why this slice is useful:**  
+It addresses a common uncertainty: users do not know whether a place is actually open.
+
+**Why not chosen for Day 06:**  
+Open-now status can be risky without real-time verification. A fake-data demo may look useful, but the real-world value depends heavily on accurate live updates.
+
+---
+
+### Slice B — Fast Delivery Suggestion [CHOSEN]
+
+**User:**  
+Busy Ocean Park 1 resident who wants food delivered within about 30–45 minutes.
+
+**Task:**  
+Choose 1–2 restaurants that are most likely to deliver fast right now.
+
+**AI decision:**  
+Estimate expected delivery ETA and confidence from simulated delivery-platform ETA, recent resident reports, open status, and distance score.
+
+**Output:**  
+Two recommendation cards, each showing:
+
+- restaurant name
+- predicted ETA range
+- confidence level
+- short rationale
+- evidence/source links
+- fallback action: call, pickup, or choose alternative
+
+**Failure mitigation:**  
+The system never places an order automatically. It shows confidence and evidence before the user decides. If confidence is low, the system labels the result as “Check before ordering”.
+
+**Why this slice is useful:**  
+It solves a narrow, frequent, and demo-friendly problem: users want food quickly but do not trust ETA signals across platforms.
+
+**Why chosen for Day 06:**
+
+1. **Narrow user task:** “I want fast delivery now” is specific and easy to demo.
+2. **Clear AI decision:** predict ETA and confidence, then rank options.
+3. **Easy fake data:** ETA, recent reports, and open status can be simulated in SQLite.
+4. **Visible value:** users immediately understand the output: 2 options, ETA, confidence, and reason.
+5. **Good failure path:** wrong ETA or closed restaurant can be handled through report/correction flow.
+
+---
+
+### Slice C — Dietary Filtered Suggestion
+
+**User:**  
+Resident or visitor in Ocean Park 1 who needs vegetarian, halal, or other dietary-specific food options.
+
+**Task:**  
+Find restaurants that likely match the dietary constraint.
+
+**AI decision:**  
+Classify restaurants by dietary tags using simulated menu tags and community evidence.
+
+**Output:**  
+Top 3 restaurants with:
+
+- dietary tag
+- confidence level
+- menu/evidence snippet
+- warning if evidence is weak
+
+**Failure mitigation:**  
+If the source evidence is unclear, the system shows “Needs verification” and asks the user to check the menu or contact the restaurant.
+
+**Why this slice is useful:**  
+It supports users with stricter food constraints and reduces manual searching.
+
+**Why not chosen for Day 06:**  
+Dietary claims are higher-risk and harder to validate in a short prototype. A wrong halal/vegetarian tag can harm trust more seriously than a wrong ETA estimate.
+
+---
+
+## 4. Final Build Slice
+
+Chosen slice: **Slice B — Fast Delivery Suggestion**
+
+### One-sentence build slice
+
+For busy Ocean Park 1 residents who want food delivered within about 45 minutes, the prototype ranks nearby restaurant options using simulated ETA and recent delivery reports, then shows 2 recommended options with confidence, evidence, and fallback actions.
+
+### User
+
+Busy resident in Ocean Park 1 who is hungry, does not want to compare multiple apps, and wants a quick delivery decision.
+
+### User task
+
+Find food that can probably arrive within 30–45 minutes.
+
+### AI decision
+
+Predict which restaurants are most likely to deliver fastest right now.
+
+### Human decision
+
+The user chooses whether to order, call, pickup, or ignore the recommendation.
+
+### Output
+
+Two restaurant cards:
+
+```text
+Restaurant: [Name]
+Predicted ETA: [30–40 min]
+Confidence: [High / Medium / Low]
+Reason: [Recent ETA stable + no slow reports]
+Evidence: [Grab ETA / ShopeeFood ETA / user report]
+Action: [View menu] [Call] [Pickup option]
+```
+
+---
+
+## 5. Auto / Aug Decision
+
+### Decision
+
+**Augmentation, not full automation.**
+
+### AI role
+
+The AI assists the user by:
+
+- estimating ETA range
+- ranking restaurant options
+- assigning confidence level
+- explaining the ranking using evidence
+- warning when data is conflicting or weak
+
+### Human role
+
+The user remains in control by:
+
+- reviewing the suggestion
+- checking confidence and evidence
+- deciding whether to order
+- choosing fallback actions when uncertainty is high
+
+### Boundary
+
+The AI must not:
+
+- place an order automatically
+- hide uncertainty
+- recommend low-confidence options as if they are reliable
+- claim real-time accuracy when the data is simulated or stale
+
+### Why this decision is appropriate
+
+Fast delivery is a moderate-risk decision. A wrong recommendation can waste time, cause frustration, or lead to a failed order. Therefore, the prototype should support the user’s decision instead of replacing it.
+
+---
+
+## 6. Ranking Logic for Prototype
+
+This is a simple heuristic suitable for Day 06. It is not a production model.
+
+### Inputs
+
+- `platform_eta_min`
+- `platform_eta_max`
+- `open_status`
+- `recent_report_status`
+- `report_recency_min`
+- `distance_score`
+- `evidence_count`
+
+### Basic ranking rule
+
+A restaurant ranks higher when:
+
+- it is open or likely open
+- ETA is lower
+- recent reports are normal
+- there are no cancellation/slow-delivery reports
+- distance score is favorable
+- evidence is recent and not conflicting
+
+### Confidence rule
+
+| Condition | Confidence |
+|---|---|
+| ETA is consistent across sources, open status is clear, no bad recent reports | High |
+| Some evidence is missing, but no strong conflict | Medium |
+| ETA conflicts, open status unknown, or recent slow/cancelled reports exist | Low |
+
+### Example pseudo-logic
+
+```text
+if open_status == "closed":
+    exclude or mark unavailable
+
+if recent_report_status in ["cancelled", "very_slow"] and report_recency_min <= 60:
+    confidence = "low"
+
+predicted_eta = weighted_average(platform_eta_min, platform_eta_max, recent_report_eta)
+
+rank_score = eta_score + distance_score + evidence_score - conflict_penalty
+```
+
+---
+
+## 7. Four Paths for Slice B
+
+### 7.1 Happy Path
+
+**Trigger:**  
+User selects “Giao nhanh” during a normal time window.
+
+**Input condition:**
+
+- Restaurant is open.
+- Grab/ShopeeFood ETA is around 30–40 minutes.
+- No recent complaint about delay or cancellation.
+- Evidence is recent enough.
+
+**System behavior:**
+
+- Query fake SQLite dataset.
+- Rank restaurants by predicted ETA and confidence.
+- Return 2 best options.
+- Show evidence links and short rationale.
+
+**User control:**
+
+- User opens menu or external delivery app.
+- User makes final order decision.
+
+**Output example:**
+
+```text
+Option 1: Demo Restaurant A
+Predicted ETA: 30–40 min
+Confidence: High
+Reason: ETA stable across sources; no slow reports in the last 60 minutes.
+Action: View menu / Order via app / Call
+```
+
+**Logged data:**
+
+- query type: fast_delivery
+- selected option
+- confidence shown
+- evidence shown
+
+---
+
+### 7.2 Low-confidence Path
+
+**Trigger:**  
+User searches for fast delivery, but data sources conflict.
+
+**Input condition:**
+
+- GrabFood ETA says 25 minutes.
+- ShopeeFood ETA says 50 minutes.
+- Recent community report says delivery is slow due to rain, peak hour, or lack of drivers.
+
+**System behavior:**
+
+- Do not hide the restaurant automatically.
+- Lower confidence to LOW.
+- Show ETA as a range, for example 45–60 minutes.
+- Explain the conflict in plain language.
+- Recommend a safer alternative if available.
+
+**User control:**
+
+- User can still order.
+- User can call the restaurant.
+- User can choose pickup.
+- User can pick another recommendation.
+
+**Output example:**
+
+```text
+Option 1: Demo Restaurant B
+Predicted ETA: 45–60 min
+Confidence: Low
+Reason: Platform ETA conflicts with recent resident reports about slow delivery.
+Warning: Check before ordering.
+Actions: Call restaurant / Choose pickup / See alternative
+```
+
+**Logged data:**
+
+- conflict_type: eta_mismatch
+- confidence: low
+- fallback shown: true
+
+---
+
+### 7.3 Failure Path
+
+**Trigger:**  
+AI predicts fast delivery, but the real outcome is bad.
+
+**Failure example:**  
+The system predicts ETA 30–40 minutes with high confidence, but the user later reports that the order was cancelled, the restaurant was closed, or delivery took more than 60 minutes.
+
+**System behavior:**
+
+- User clicks “Report wrong ETA” or “Report closed/unavailable”.
+- System records the mismatch.
+- The restaurant is temporarily down-ranked in the current demo/session.
+- The UI shows fallback options.
+
+**User control:**
+
+- User can choose another restaurant.
+- User can switch to pickup.
+- User can call the restaurant.
+- User can submit correction evidence.
+
+**Output example:**
+
+```text
+Sorry, this recommendation may be wrong.
+Reported issue: Delivery delayed over 60 minutes.
+Suggested next step: Choose a nearby pickup option or try another high-confidence restaurant.
+```
+
+**Logged data:**
+
+- failure_type: wrong_eta / closed / cancelled
+- predicted_eta
+- actual_user_report
+- restaurant_id
+- timestamp
+
+---
+
+### 7.4 Correction Path
+
+**Trigger:**  
+User notices that restaurant information is wrong.
+
+**Correction examples:**
+
+- Restaurant is closed.
+- Hotline is wrong.
+- Menu is outdated.
+- Delivery is currently unavailable.
+- Location changed.
+
+**System behavior:**
+
+- Show a short correction form.
+- Let user choose the error type.
+- Let user add optional note or screenshot link.
+- Temporarily mark the restaurant as “Needs verification”.
+- Create a review item for Evidence Owner.
+
+**User control:**
+
+- User decides whether to submit correction.
+- User can continue using recommendations without submitting.
+
+**Output example:**
+
+```text
+Thanks for the correction.
+This restaurant will be marked as “Needs verification” until the team checks the evidence.
+```
+
+**Logged data:**
+
+- correction_type
+- user_note
+- restaurant_id
+- source_conflict
+- needs_review: true
+
+---
+
+## 8. Worst Failure Mode
+
+### Worst failure
+
+The AI recommends a restaurant as fast and available, but the restaurant is actually closed, unavailable, or delivery is suspended.
+
+### Impact
+
+- User wastes time.
+- User may place a failed order.
+- User loses trust in the product.
+- The product appears to “invent certainty” from weak data.
+
+### Prototype mitigation
+
+The prototype handles this by:
+
+- always showing confidence
+- always showing evidence/source links
+- never auto-ordering
+- marking uncertain recommendations as “Check before ordering”
+- providing fallback actions: call, pickup, or alternative restaurant
+- allowing user correction
+- logging mismatch for evidence review
+
+### Rule
+
+If confidence is low, the system must not present the option as “recommended”. It should present it as “possible option — check first”.
+
+---
+
+## 9. Handoff to Prototype Owner
+
+Member D can build a thin prototype using this flow:
+
+1. User opens app.
+2. User selects “Giao nhanh”.
+3. User location defaults to Ocean Park 1.
+4. Backend reads fake restaurant data from SQLite.
+5. Ranking heuristic calculates ETA and confidence.
+6. UI shows 2 recommendation cards.
+7. User can click:
+   - view source
+   - call restaurant
+   - report wrong info
+   - see alternative
+
+Minimum screens:
+
+1. Search/input screen
+2. Recommendation results screen
+3. Low-confidence warning state
+4. Report/correction form
+5. Fallback alternative state
+
+---
+
+## 10. Success Criteria
+
+For Day 06, the build slice is successful if:
+
+- The prototype returns 2 recommendations from fake data.
+- Each recommendation includes ETA, confidence, reason, and evidence.
+- The happy path can be demoed in under 3 minutes.
+- Low-confidence path visibly shows uncertainty.
+- Failure path allows user to report wrong ETA or closed restaurant.
+- The system never claims to place an order automatically.
+- The team can explain why Slice B was chosen over Slice A and Slice C.
+
+---
+
+## 11. Out of Scope
+
+The following are not part of this build slice:
+
+- Full food ordering flow
+- Payment
+- Live scraping
+- Real-time delivery API integration
+- Complete restaurant discovery app
+- Full dietary verification system
+- Long-term trust/reputation model
+- Production-grade recommendation model
+
+---
+
+## 12. Final Summary
+
+Slice B is the best Day 06 build slice because it is narrow, testable, and demo-friendly. It focuses on one user, one task, one AI decision, and one clear output. The AI does not replace the user’s judgment; it helps the user make a faster and more informed food-delivery decision by ranking options, showing confidence, and exposing uncertainty.
