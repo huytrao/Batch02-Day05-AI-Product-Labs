@@ -15,8 +15,13 @@ Nhóm tự dùng app/workflow và ghi lại điểm gãy.
 
 | Observation | Screenshot/link | Path liên quan | Điều học được |
 |---|---|---|---|
+|  | https://gemini.google.com/share/fa53e1b4f3e2 | Happy |  |
+|  |  https://gemini.google.com/share/4e5b771d1c9b |  Failure | thông tin không chính xác |
 |  |  | Happy / Low-confidence / Failure / Correction |  |
 |  |  | Happy / Low-confidence / Failure / Correction |  |
+|  |  | Happy / Low-confidence / Failure / Correction |  |
+
+
 
 ## 3. User / review / social evidence
 
