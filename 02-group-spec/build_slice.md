@@ -1,6 +1,6 @@
 Project: **Ocean Park 1 Eats — Aggregated Dining Info**  
 Chosen Slice: **Slice B — Fast Delivery Suggestion**  
-Owner: **CT — Product Spec Owner**  
+Owner: **CTh — Product Spec Owner**  
 Version: **Day 05 final-ready spec**
 
 ---
