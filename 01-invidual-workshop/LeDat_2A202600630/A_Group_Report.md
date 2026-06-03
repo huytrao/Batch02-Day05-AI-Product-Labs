@@ -1,73 +1,22 @@
 ### Member A — Research Owner
+- Role: Lead quick research and collect evidence.
+- Goals: Produce `evidence_pack.md` with self-use logs and external links.
+- Deliverables:
+  - `02-group-spec/evidence_pack.md` (20 posts/reviews, 8 screenshots)
 
-#### Role
-- Lead quick research, collect evidence, and shape the product findings into a usable asset for the group.
-- Focus on rapid user self-use, external voice, and assumptions that need validation.
+  - `02-group-spec/sample_data.csv` (initial fake data rows)
+  
+- Checklist:
+  - [ ] Self-use session notes (timestamped)
+  - [ ] Collect 20 external posts/reviews (links)
+  - [ ] Capture 8 screenshots (FB/Google/Grab)
+  - [ ] Mark any assumptions needing validation
+- Deadline: +90 minutes
 
-#### Goals
-- Produce `02-group-spec/evidence_pack.md` with:
-  - self-use logs and timestamped observation notes
-  - 20 external posts/reviews or references
-  - 8 supporting screenshots from Facebook, Google Reviews, Grab, or related sources
-- Produce `02-group-spec/sample_data.csv` containing realistic fake data rows for product discovery.
+- `02-group-spec/evidence_pack.md` (20 posts/reviews, 8 screenshots)
 
-#### Deliverables
-- `02-group-spec/evidence_pack.md` — research evidence package
-- `02-group-spec/sample_data.csv` — initial fake data sample
-- This report file — summary of activities and research status
-
-#### Research Activities
-1. Self-use session
-   - Used the target AI product flow for at least one full user scenario.
-   - Recorded timestamped notes for every key interaction and failure point.
-   - Captured behavior that shows the product promise vs. actual delivery.
-
-2. External review collection
-   - Sourced at least 20 public posts, reviews, or comments that describe user sentiment, common problems, or expectations.
-   - Prioritized real user language from Facebook groups, Google Reviews, and Grab-related conversations.
-
-3. Screenshot evidence
-   - Collected 8 screenshots showing product interactions, error states, or testimonial evidence.
-   - Each screenshot is referenced in `02-group-spec/evidence_pack.md`.
-
-4. Assumption tracking
-   - Identified assumptions that should be validated with the team or through further testing.
-   - Marked them clearly in the evidence pack and this report.
-
-#### Key Findings
-- The AI product promises quick help and clear guidance, but the actual experience can be inconsistent across use cases.
-- Common user pain points include:
-  - missing or incomplete answers
-  - unclear fallback when AI cannot resolve the request
-  - lack of confidence indicators for uncertain responses
-- External posts confirm users expect a dependable and conversational AI assistant rather than a generic chatbot.
-- Several reviews mention trust issues when the AI gives an answer that does not match official policy or common sense.
-
-#### Evidence Pack Summary
-- `02-group-spec/evidence_pack.md` contains:
-  - 1 full self-use session log with timestamps
-  - 8 screenshots mapped to specific observations
-  - 20 external references with direct links or quoted text
-  - 5 assumptions requiring validation
-
-#### Assumptions Requiring Validation
-- The product claim is that it can handle service questions accurately without human handoff for common tasks.
-- Users will trust the AI if the answer appears complete and actionable.
-- The product should escalate gracefully when it cannot resolve a request.
-- Screenshot evidence is sufficient to prove the issue patterns to the product team.
-
-#### Checklist
-- [x] Self-use session notes (timestamped)
-- [x] Collect 20 external posts/reviews (links)
-- [x] Capture 8 screenshots (FB/Google/Grab)
-- [x] Mark any assumptions needing validation
-
-#### Timeline
-- Start: immediately after assignment
-- Deadline: +90 minutes from assignment
-- Status: On track, research evidence drafted and assets being finalized
-
-#### Next Steps
-- Finalize `02-group-spec/evidence_pack.md` with all external references and screenshot captions.
-- Generate `02-group-spec/sample_data.csv` with at least 10 realistic fake rows.
-- Review report with the team and confirm any assumptions before handoff.
+| Observation | Screenshot/link | Path liên quan | Điều học được |
+|---|---|---|---|
+| AI gợi ý quán "vừa có cơm gà vừa có chay" nhưng thực tế không có (Hội thoại 1 — Ocean Park 1, gia đình có người lớn tuổi ăn chay) | [Link #1](https://gemini.google.com/share/70129533832a) | Happy / Low-confidence / Failure / Correction | **Failure:** AI tự tin gợi ý Nét Huế "có menu đồ chay phong phú" và các quán chay chuyên biệt — nhưng ngay lượt sau thừa nhận quán cơm gà không có chay, và Nét Huế chỉ có vài món rau/đậu nấu chung bếp mặn. **Correction:** Sau khi user phản bác, AI đính chính và đề xuất mua tách biệt từ 2 quán. **Học được:** AI cần phân biệt rõ quán thuần chay vs quán mặn có vài món rau. Với use-case "gia đình có người ăn chay nghiêm ngặt", assistant phải hỏi thêm mức độ chay trước khi gợi ý, tránh hallucination về thực đơn cụ thể. |
+| AI bịa review 1–2 sao có tên người dùng và nội dung chi tiết (Hội thoại 3 — Bông Ốc Hải Phòng trước cổng VinUni) | [Link #3](https://gemini.google.com/share/b2261087abb0) | Failure / Correction | **Failure nghiêm trọng nhất:** Khi user hỏi "có review tệ cụ thể nào không, cho đường link với", AI tự bịa 3 review với tên người dùng ("N. T. Anh", "Minh Hoàng", "Thùy Linh") và nội dung chi tiết — hoàn toàn không có thật trên Google Maps. **Correction:** Khi user phản bác "bạn xạo à", AI mới thừa nhận đã "vẽ" ra nội dung. **Học được:** AI assistant cho dining info tuyệt đối không được bịa review. Nếu không có dữ liệu thực, phải nói thẳng và hướng dẫn user tự tra Maps với filter "Thấp nhất". Cần guardrail: chỉ cite khi có source thật. |
+| AI gợi ý sai mức giá của chuỗi cơm thố, user phải sửa 2 lần ở 2 session khác nhau (Hội thoại 2 & 4 — Sinh viên VinUni tìm cơm 30–50k) | [Link #2](https://gemini.google.com/share/51b3e9d4ca94) / [Link #4](https://gemini.google.com/share/89b5e6a8ad09) | Happy / Low-confidence / Failure / Correction | **Failure lặp lại:** AI báo Cơm Thố Anh Nguyễn "từ 38k" trong khi thực tế thấp nhất là 50k. Lỗi xuất hiện ở cả 2 session, cho thấy AI ước đoán giá thay vì có dữ liệu thực. **Học được:** Cần data layer với giá được verify định kỳ, hoặc disclaimer bắt buộc "giá có thể thay đổi". Không được báo khoảng giá mà trái với ngân sách user đã nêu rõ. Nên query giá thực trước khi recommend khi user có ràng buộc ngân sách cụ thể. |
