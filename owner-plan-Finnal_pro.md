@@ -2,7 +2,7 @@
 
 ## Team assignments (5 members)
 
-### Member A — Research Owner
+### Member A — Lê Hữu Đạt (2A202600630) — Research Owner
 - Role: Lead quick research and collect evidence.
 - Goals: Produce `evidence_pack.md` with self-use logs and external links.
 - Deliverables:
@@ -15,7 +15,7 @@
   - [ ] Mark any assumptions needing validation
 - Deadline: +90 minutes
 
-### Member B — Evidence Owner
+### Member B — Nguyễn Đông Anh (2A20600760) — Evidence Owner
 - Role: Synthesize evidence into insights and opportunity.
 - Goals: Produce `opportunity_statement.md` and evidence summary.
 - Deliverables:
@@ -28,7 +28,7 @@
   - [ ] Write short opportunity statement
 - Deadline: +120 minutes
 
-### Member C — Product Spec Owner
+### Member C — Công Thái (2A202600949) — Product Spec Owner
 - Role: Design build slices and choose final slice.
 - Goals: Produce `build_slice.md` with 3 slices and final choice, Auto/Aug decision and four paths.
 - Deliverables:
@@ -40,7 +40,7 @@
   - [ ] Create detailed four paths
 - Deadline: +150 minutes
 
-### Member D — Prototype Owner
+### Member D — Nguyễn Đức Mạnh (2A20260724) — Prototype Owner
 - Role: Prepare thin spec and demo flow for Day 06 (no code).
 - Goals: Produce `thin_spec_draft.md` and sample sqlite schema.
 - Deliverables:
@@ -53,7 +53,7 @@
   - [ ] Prepare sqlite schema (restaurant, eta_est, tags, evidence_links)
 - Deadline: +180 minutes
 
-### Member E — Demo & Repo Owner
+### Member E — Trảo An Huy (2A202600819) — Demo & Repo Owner
 - Role: Collate artifacts, format, and prepare demo script.
 - Goals: Produce `description.md` (this file), repo structure and 3-minute demo script.
 - Deliverables:
