@@ -1,0 +1,130 @@
+# Repo structure for Day 06 — Ocean Park 1 Eats
+
+## Root directory
+
+```
+Day06-MãHọcViên-HọVàTên/
+├── README.md                           # Entry point: problem, scope, how to run
+├── 01-individual-workshop/
+│   └── app-teardown.md                # Each member's reflection (individual)
+│
+└── 02-group-spec/
+    ├── description.md                 # Day 05 final deliverables summary
+    ├── evidence_pack.md               # Evidence Pack artifact
+    ├── opportunity_statement.md        # Opportunity Statement artifact
+    ├── build_slice.md                 # Build Slice (3 options + chosen)
+    ├── thin_spec_draft.md             # Thin SPEC Draft
+    ├── FINAL_THIN_SPEC.md             # Merged final SPEC (if Day 06 updates)
+    ├── demo_script.txt                # 3-minute demo flow
+    ├── owner-plan.md                  # Team assignments (reference only)
+    ├── sample_data.sqlite             # Fake DB for Day 06 prototype
+    ├── sample_data_schema.sql          # SQLite CREATE TABLE statements
+    ├── repo-structure.txt              # This file
+    └── feedback.txt                   # Feedback collected post-demo
+```
+
+## Key files (Day 05 submission)
+
+1. **README.md** — Introduce the problem and product
+   - Problem statement (2–3 sentences)
+   - User segment
+   - Build slice overview
+   - How to run Day 06 prototype (once built)
+   - Team roles (link to owner-plan.md)
+
+2. **02-group-spec/description.md** — Master deliverables doc
+   - All artifacts consolidated
+   - Links to detailed files
+
+3. **02-group-spec/evidence_pack.md** — Evidence evidence
+   - Self-use observations
+   - External links (FB posts, Google reviews, etc.)
+   - Evidence summary + insights
+
+4. **02-group-spec/opportunity_statement.md** — User + pain + opportunity
+   - Short form (1 paragraph)
+   - User journey
+   - Existing behavior
+
+5. **02-group-spec/build_slice.md** — 3 slices + decision
+   - Slice A, B, C with user/task/AI/output
+   - Final choice with rationale
+   - Auto/Aug decision
+   - Four paths (happy, low-confidence, failure, correction)
+
+6. **02-group-spec/thin_spec_draft.md** — Prototype spec
+   - Problem + user + workflow
+   - Inputs + outputs
+   - Success criteria
+   - Scope Day 06 / Out of Scope
+
+7. **02-group-spec/demo_script.txt** — Demo guide (this file for reference)
+   - Happy path (90s)
+   - Failure path (30s)
+   - Q&A prep (30s)
+
+8. **02-group-spec/sample_data.sqlite** — Fake data for prototype
+   - Tables: restaurants, eta_estimates, tags, evidence_links
+   - ≥10 sample rows pre-loaded
+
+## Day 06 additions (NOT required for Day 05)
+
+Once Day 06 starts, add:
+
+```
+02-group-spec/
+├── prototype/                         # (NEW) Day 06 code
+│   ├── backend/
+│   │   └── app.py                    # Backend (Flask/FastAPI/simple script)
+│   ├── frontend/
+│   │   ├── index.html
+│   │   └── style.css
+│   └── data/
+│       └── restaurants.sqlite         # Updated sample DB
+├── tests/
+│   └── test_demo.md                  # Test cases for happy + failure paths
+└── FINAL_THIN_SPEC.md                # (UPDATED) if changes from Day 05
+```
+
+## Guidelines
+
+- **All Day 05 files stay in `02-group-spec/`.** Do not move them.
+- **Each member copies `02-group-spec/` contents into their personal repo.**
+- **Day 06 prototype code lives in `02-group-spec/prototype/` (or a new folder).**
+- **SQLite DB:** Use `sample_data.sqlite` for demo; Day 06 code reads from it directly.
+- **No external APIs in Day 06 MVP.** Fake data only.
+
+## Fake data schema (sample)
+
+```sql
+CREATE TABLE restaurants (
+  id INTEGER PRIMARY KEY,
+  name TEXT,
+  cuisine TEXT,
+  location TEXT,
+  phone TEXT,
+  tags TEXT  -- comma-separated: 'giao_nhanh', 'chay', 'an_chay'
+);
+
+CREATE TABLE eta_estimates (
+  id INTEGER PRIMARY KEY,
+  restaurant_id INTEGER,
+  delivery_platform TEXT,  -- 'shopee', 'grab', 'facebook', 'google'
+  eta_min INTEGER,  -- e.g. 30
+  eta_max INTEGER,  -- e.g. 45
+  last_updated TIMESTAMP
+);
+
+CREATE TABLE evidence_links (
+  id INTEGER PRIMARY KEY,
+  restaurant_id INTEGER,
+  source_type TEXT,  -- 'facebook', 'google', 'shopee', 'user_report'
+  quote TEXT,
+  link TEXT,
+  timestamp TIMESTAMP
+);
+```
+
+---
+
+**For Member E:** Ensure this structure is in place before Day 06 kicks off. Team members should be able to clone the repo and see all Day 05 artifacts clearly organized.
